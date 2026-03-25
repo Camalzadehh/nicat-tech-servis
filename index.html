@@ -1,1 +1,157 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nicat Tech Servis</title>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background:#0f172a;
+  color:white;
+}
+
+/* NAVBAR */
+.navbar {
+  position: fixed;
+  top:0;
+  width:100%;
+  background:#020617;
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  padding:15px;
+}
+
+.navbar a {
+  color:white;
+  text-decoration:none;
+  font-weight:bold;
+}
+
+.navbar a:hover {
+  color:#38bdf8;
+}
+
+/* SECTIONS */
+.section {
+  padding-top:100px;
+  text-align:center;
+}
+
+/* PRODUCTS */
+.card {
+  background:#1e293b;
+  padding:15px;
+  margin:10px;
+  border-radius:10px;
+  display:inline-block;
+  width:200px;
+}
+
+img {
+  width:100%;
+  border-radius:8px;
+}
+
+/* CHAT */
+.chat-box {
+  background:#1e293b;
+  padding:20px;
+  border-radius:10px;
+  display:inline-block;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <a href="#products">Məhsullar</a>
+  <a href="#services">Xidmətlər</a>
+  <a href="#contact">Əlaqə</a>
+  <a href="#chat">Online Chat</a>
+</div>
+
+<!-- HERO -->
+<div class="section">
+  <h1>💻 Nicat Tech Servis</h1>
+  <p>Kompüter təmiri və aksesuar satışı</p>
+</div>
+
+<!-- PRODUCTS -->
+<div id="products" class="section">
+  <h2>🛒 Məhsullar</h2>
+  <div id="productList"></div>
+</div>
+
+<!-- SERVICES -->
+<div id="services" class="section">
+  <h2>⚙️ Xidmətlər</h2>
+  <p>Windows yazılması</p>
+  <p>Format və optimizasiya</p>
+  <p>Oyun və proqram yükləmə</p>
+  <p>Laptop təmiri</p>
+</div>
+
+<!-- CONTACT -->
+<div id="contact" class="section">
+  <h2>📞 Əlaqə</h2>
+  <p id="phone">Yüklənir...</p>
+  <p>📍 Bərdə</p>
+</div>
+
+<!-- CHAT -->
+<div id="chat" class="section">
+  <h2>💬 Online Chat</h2>
+  <div class="chat-box">
+    <p>WhatsApp ilə yaz:</p>
+    <a href="https://wa.me/994504251825" target="_blank">
+      📲 WhatsApp aç
+    </a>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCPprPO6t7uD6LCeTLNRx2LIjiDEwE",
+  authDomain: "nicat-tech.firebaseapp.com",
+  projectId: "nicat-tech"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* PRODUCTS LOAD */
+db.collection("products").onSnapshot(snapshot=>{
+  let html="";
+  snapshot.forEach(doc=>{
+    let p = doc.data();
+    html += `
+      <div class="card">
+        <img src="${p.image}">
+        <h3>${p.name}</h3>
+        <p>${p.price} AZN</p>
+      </div>
+    `;
+  });
+  document.getElementById("productList").innerHTML = html;
+});
+
+/* PHONE */
+db.collection("settings").doc("main").onSnapshot(doc=>{
+  if(doc.exists){
+    document.getElementById("phone").innerText = doc.data().phone;
+  }
+});
+</script>
+
+</body>
+</html>
