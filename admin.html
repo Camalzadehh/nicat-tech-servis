@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
 
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+
+<style>
+body { font-family: Arial; background:#0f172a; color:white; text-align:center; }
+input, button { padding:10px; margin:5px; }
+.card { background:#1e293b; padding:10px; margin:10px; border-radius:8px; display:inline-block; width:200px;}
+img { width:100%; border-radius:8px; }
+</style>
+</head>
+
+<body>
+
+<h1>🔐 Admin Panel</h1>
+
+<!-- LOGIN -->
+<div id="login">
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- PANEL -->
+<div id="panel" style="display:none;">
+
+  <h2>➕ Məhsul əlavə et</h2>
+  <input id="name" placeholder="Ad"><br>
+  <input id="price" placeholder="Qiymət"><br>
+  <input type="file" id="file"><br>
+  <button onclick="uploadImage()">Şəkil upload</button><br>
+  <input id="image" placeholder="Image URL"><br>
+  <button onclick="addProduct()">Əlavə et</button>
+
+  <h2>📞 Telefon dəyiş</h2>
+  <input id="phone" placeholder="Telefon">
+  <button onclick="updatePhone()">Yenilə</button>
+
+  <h2>🛒 Məhsullar</h2>
+  <div id="products"></div>
+
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCPprPO6t7uD6LCeTLNRx2LIjiDEwE",
+  authDomain: "nicat-tech.firebaseapp.com",
+  projectId: "nicat-tech",
+  storageBucket: "nicat-tech.appspot.com",
+  messagingSenderId: "367189445591",
+  appId: "1:367189445591:web:02c96c06dff4c806ae9992"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+const storage = firebase.storage();
+
+/* LOGIN */
+function login(){
+  auth.signInWithEmailAndPassword(
+    document.getElementById("email").value,
+    document.getElementById("password").value
+  ).then(()=>{
+    document.getElementById("login").style.display="none";
+    document.getElementById("panel").style.display="block";
+    loadProducts();
+  }).catch(e=>alert(e.message));
+}
+
+/* UPLOAD IMAGE */
+function uploadImage(){
+  let file = document.getElementById("file").files[0];
+  let ref = storage.ref("products/"+file.name);
+
+  ref.put(file).then(snap=>{
+    snap.ref.getDownloadURL().then(url=>{
+      document.getElementById("image").value = url;
+      alert("Şəkil yükləndi");
+    });
+  });
+}
+
+/* ADD PRODUCT */
+function addProduct(){
+  db.collection("products").add({
+    name: document.getElementById("name").value,
+    price: document.getElementById("price").value,
+    image: document.getElementById("image").value
+  });
+}
+
+/* UPDATE PHONE */
+function updatePhone(){
+  db.collection("settings").doc("main").set({
+    phone: document.getElementById("phone").value
+  });
+}
+
+/* LOAD PRODUCTS */
+function loadProducts(){
+  db.collection("products").onSnapshot(snapshot=>{
+    let html="";
+    snapshot.forEach(doc=>{
+      let p = doc.data();
+      html += `
+        <div class="card">
+          <img src="${p.image}">
+          <h3>${p.name}</h3>
+          <p>${p.price} AZN</p>
+        </div>
+      `;
+    });
+    document.getElementById("products").innerHTML = html;
+  });
+}
+</script>
+
+</body>
+</html>
